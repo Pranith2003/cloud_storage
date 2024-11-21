@@ -24,6 +24,7 @@ app.use(
 
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/file", require("./routes/filemanagement"));
+app.use('/api/monitoring', require('./routes/monitoring'));
 
 app.get("/", (req, res) => {
   res.send("Hello World");
