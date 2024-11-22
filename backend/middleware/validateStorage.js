@@ -1,27 +1,18 @@
-const validStorageTypes = ["s3", "hdfs", "mongodb"]; // List of supported storage types
+const allowedStorageTypes = ['s3', 'hdfs', 'mongo'];
+
 const validateStorage = (req, res, next) => {
-  try {
-    // Extract the storage type from request headers, query, or body (customize as needed)
-    const { storageType } = req.body;
-    // Check if the storageType is provided
-    if (!storageType) {
-      return res.status(400).json({ error: "Storage type is required." });
+    const { storageType } = req.body; // Get storageType from the body (or query params)
+
+    // Check if storageType is valid
+    if (!allowedStorageTypes.includes(storageType)) {
+        return res.status(400).json({ error: 'Invalid storage type. Allowed types are: s3, hdfs, mongo.' });
     }
-    // Validate the storage type
-    if (!validStorageTypes.includes(storageType.toLowerCase())) {
-      return res.status(400).json({
-        error: `Invalid storage type. Supported types are: ${validStorageTypes.join(
-          ", "
-        )}`,
-      });
-    }
-    // Attach the validated storage type to the request for further use
-    req.storageType = storageType.toLowerCase();
-    next(); // Continue to the next middleware or route handler
-  } catch (error) {
-    console.error("Error in validateStorage middleware:", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
+
+    // Attach the valid storageType to the request object for later use
+    req.storageType = storageType;
+
+    // Proceed to the next middleware or route handler
+    next();
 };
 
 module.exports = validateStorage;

@@ -1,33 +1,49 @@
+// routes/filemanagement.js
 const express = require('express');
-const validateStorage = require('../middleware/validateStorage');
+const multer = require('multer');
+const fetchUser = require('../middleware/fetchuser');
+const storageSelector = require('../middleware/storageSelector');
+const s3Service = require('../services/s3');
+const hdfsService = require('../services/hdfs');
+const mongoService = require('../services/mongo');
+const File = require('../models/file');
 const router = express.Router();
 
-router.post('/upload', validateStorage, async (req, res) => {
-    const { storageType } = req; // Retrieved from the middleware
-    const file = req.files.file;
+// Setup multer for file uploads
+const upload = multer({ dest: 'uploads/' });
+
+router.post("/upload", [fetchUser, upload.single('file'), storageSelector], async (req, res) => {
+    const { selectedStorage } = req;  // The storage backend selected by storageSelector.js
 
     try {
-        switch (storageType) {
-            case 's3':
-                // Call AWS S3 service
-                await uploadToS3('myBucket', file);
-                res.send('File uploaded to S3');
-                break;
-            case 'hdfs':
-                // Call HDFS service
-                await uploadToHDFS('/path/on/hdfs', file.path);
-                res.send('File uploaded to HDFS');
-                break;
-            case 'mongodb':
-                // Call MongoDB service
-                await saveToMongoDB(file);
-                res.send('File saved to MongoDB');
-                break;
-            default:
-                throw new Error('Unsupported storage type');
+        let fileData = null;
+
+        // Select appropriate service based on the selectedStorage
+        if (selectedStorage === "s3") {
+            fileData = await s3Service.uploadFile(req.file);
+        } else if (selectedStorage === "hdfs") {
+            fileData = await hdfsService.uploadFile(req.file);
+        } else if (selectedStorage === "mongo") {
+            fileData = await mongoService.uploadFile(req.file);
         }
+
+        // Save file metadata to MongoDB (common for all storage types)
+        const fileMetadata = {
+            fileName: req.file.originalname,
+            fileType: req.file.mimetype,
+            fileSize: req.file.size,
+            storageType: selectedStorage,
+            filePath: fileData.filePath,  // Path returned by the selected storage service
+            uploadedBy: req.user.id // Assuming req.user is populated by fetchUser middleware
+        };
+
+        const file = new File(fileMetadata);
+        await file.save();
+
+        return res.status(200).json({ success: true, file });
     } catch (error) {
-        res.status(500).send(error.message);
+        console.error("Error during file upload:", error);
+        return res.status(500).json({ success: false, message: error.message });
     }
 });
 
