@@ -1,20 +1,20 @@
-// middleware/storageSelector.js
-const config = require('../config/storageConfig');  // Add your thresholds configuration
-
 module.exports = (req, res, next) => {
-    const { file } = req;
+  const isFile = req.body.fileName;
+  console.log(isFile);
+  console.log("File received by Multer:", isFile); // Log file details
+  if (!isFile) {
+    return res.status(400).json({ error: "No file provided in the request" });
+  }
 
-    // Example: Select storage backend based on file size
-    if (file.size <= config.sizeThresholds.small) {
-        req.selectedStorage = "mongo";  // Small files go to MongoDB
-    } else if (file.size <= config.sizeThresholds.medium) {
-        req.selectedStorage = "s3";    // Medium files go to S3
-    } else {
-        req.selectedStorage = "hdfs";  // Large files go to HDFS
-    }
+  const fileSizeMB = req.body.fileSize / (1024 * 1024);
 
-    // Log the selected storage
-    console.log(`Selected storage for ${file.originalname}: ${req.selectedStorage}`);
+  if (fileSizeMB <= 10) {
+    req.body.storageType = "mongo";
+  } else if (fileSizeMB <= 100) {
+    req.body.storageType = "hdfs";
+  } else {
+    req.body.storageType = "s3";
+  }
 
-    next();  // Continue to the next middleware or route handler
+  next();
 };

@@ -1,5 +1,3 @@
-// hdfsConfig.js
-
 const WebHDFS = require('webhdfs'); // Import the webhdfs library
 
 // HDFS Configuration
