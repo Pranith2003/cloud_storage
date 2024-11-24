@@ -6,7 +6,6 @@ const s3Client = new S3Client({ region: process.env.AWS_REGION });
 
 const uploadFile = async (file) => {
     const fileStream = fs.createReadStream(file.path);
-
     const uploadParams = {
         Bucket: process.env.S3_BUCKET_NAME,
         Key: `uploads/${file.originalname}`,
