@@ -2,9 +2,6 @@ const express = require("express");
 const mongodb_conn = require("./config/db");
 const cors = require("cors");
 const session = require("express-session");
-const multer = require("multer");
-const Busboy = require("busboy");
-
 require("dotenv").config();
 
 const app = express();
@@ -14,9 +11,15 @@ const port = 3000;
 mongodb_conn();
 
 // Middleware setup
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+const corsOptions = {
+  origin: "http://localhost:5173", // Frontend origin
+  credentials: true, // Allow cookies and credentials
+};
+
+app.use(cors(corsOptions));
 
 const key = process.env.SESSION_KEY;
 
@@ -25,7 +28,7 @@ app.use(
     secret: key,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false, httpOnly: true }, // Set `secure: true` if using HTTPS
+    cookie: { secure: false, httpOnly: true, maxAge: 1000 * 60 * 60 * 24 }, // Set `secure: true` if using HTTPS
   })
 );
 
@@ -39,7 +42,6 @@ app.use(
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/monitoring", require("./routes/monitoring"));
 app.use("/api/file/", require("./routes/filemanagement"));
-
 
 // File upload route
 // app.use(

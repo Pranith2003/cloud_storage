@@ -99,6 +99,7 @@ router.get("/list", fetchUser, async (req, res) => {
   }
 });
 
+
 router.get("/download/:id", fetchUser, async (req, res) => {
   const fileId = req.params.id;
 
@@ -112,21 +113,14 @@ router.get("/download/:id", fetchUser, async (req, res) => {
         .json({ success: false, message: "File not found" });
     }
 
-    let fileStream;
+    console.log(`Downloading file from MongoDB with ID: ${file.filePath}`);
 
-    // Fetch the file from the appropriate storage service
-    if (file.storageType === "s3") {
-      fileStream = await s3Service.downloadFile(file.filePath);
-    } else if (file.storageType === "hdfs") {
-      fileStream = await hdfsService.downloadFile(file.filePath);
-    } else if (file.storageType === "mongo") {
-      fileStream = await mongoService.downloadFile(file.filePath);
-    }
+    const fileStream = await mongoService.downloadFile(file.filePath);
 
     if (!fileStream) {
       return res.status(500).json({
         success: false,
-        message: "Failed to retrieve the file from storage",
+        message: "Failed to retrieve the file from MongoDB",
       });
     }
 
@@ -139,6 +133,12 @@ router.get("/download/:id", fetchUser, async (req, res) => {
 
     // Pipe the file stream to the response
     fileStream.pipe(res);
+
+    // Handle stream errors
+    fileStream.on("error", (err) => {
+      console.error("Error while piping file stream to response:", err);
+      res.status(500).json({ success: false, message: "Error streaming file" });
+    });
   } catch (error) {
     console.error("Error during file download:", error);
     res.status(500).json({ success: false, message: error.message });
