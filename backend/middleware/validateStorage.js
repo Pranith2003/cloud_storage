@@ -2,6 +2,7 @@ const allowedStorageTypes = ['s3', 'hdfs', 'mongo'];
 
 const validateStorage = (req, res, next) => {
     const { storageType } = req.body; // Get storageType from the body (or query params)
+    console.log()
 
     // Check if storageType is valid
     if (!allowedStorageTypes.includes(storageType)) {

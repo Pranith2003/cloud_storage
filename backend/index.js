@@ -30,29 +30,34 @@ app.use(
 );
 
 // Multer setup for file uploads
-const upload = multer({ dest: "uploads/" });
+// const upload = multer({
+//   dest: "uploads/",
+//   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+// });
 
 // Routes
-const validateStorage = require("./middleware/storageSelector");
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/monitoring", require("./routes/monitoring"));
+app.use("/api/file/", require("./routes/filemanagement"));
+
 
 // File upload route
-app.use(
-  "/api/file",
-  upload.single("file"), // Process the file upload
-  validateStorage, // Select storage type based on file size
-  require("./routes/filemanagement")
-);
+// app.use(
+//   "/api/file",
+//   upload.single("file"), // Process the file upload
+//   validateStorage, // Select storage type based on file size
+//   require("./routes/filemanagement")
+// );
 
-app.post("/test-upload", upload.single("file"), (req, res) => {
-  const isFile = req.body.fileName;
-  console.log("File uploaded:", isFile);
-  if (!isFile) {
-    return res.status(400).json({ error: "No file provided in the request" });
-  }
-  res.json({ message: "File uploaded successfully", file: req.file });
-});
+// app.post("/test-upload", upload.single("file"), async (req, res) => {
+//   console.log(req);
+//   const isFile = await req.file;
+//   console.log("File uploaded:", isFile);
+//   if (!isFile) {
+//     return res.status(400).json({ error: "No file provided in the request" });
+//   }
+//   res.json({ message: "File uploaded successfully", file: req.file });
+// });
 
 app.get("/", (req, res) => {
   res.send("Hello World");

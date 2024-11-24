@@ -2,7 +2,7 @@
 const express = require("express");
 const multer = require("multer");
 const fetchUser = require("../middleware/fetchuser");
-const storageSelector = require("../middleware/storageSelector");
+const { storageSelector, filetype } = require("../middleware/storageSelector");
 const s3Service = require("../services/s3");
 const hdfsService = require("../services/hdfs");
 const mongoService = require("../services/mongo");
@@ -17,13 +17,22 @@ router.post(
   [fetchUser, upload.single("file"), storageSelector],
   async (req, res) => {
     const { selectedStorage } = req; // The storage backend selected by storageSelector.js
-    console.log(req.body);
-    const { fileName, fileType, fileSize, storageType, filePath } = req.body;
-    console.log("Selected Storage:", selectedStorage); // Debug log
-    console.log("File received by Multer:", req.file);
+    // console.log(req.body);
+    const {
+      fieldname,
+      originalname,
+      encoding,
+      mimetype,
+      destination,
+      filename,
+      path,
+      size,
+    } = req.file;
+    // console.log("Selected Storage:", req.body.storageType); // Debug log
+    // console.log("File received by Multer:", req.file);
     try {
       let fileData = null;
-
+      console.log("S3 Service: ", s3Service);
       // Select appropriate service based on the selectedStorage
       if (selectedStorage === "s3") {
         fileData = await s3Service.uploadFile(req.file);
@@ -32,17 +41,17 @@ router.post(
       } else if (selectedStorage === "mongo") {
         fileData = await mongoService.uploadFile(req.file);
       }
+    //   console.log("Filepath: " + (fileData.filePath || "unknown"));
+
       fileData = {
         filePath: "https://google.com",
       };
-      console.log(fileData);
-
       // Save file metadata to MongoDB (common for all storage types)
       const fileMetadata = {
-        fileName,
-        fileType,
-        fileSize,
-        storageType: selectedStorage || "unknown",
+        fileName: originalname,
+        fileType: mimetype,
+        fileSize: size,
+        storageType: req.body.storageType,
         filePath: fileData.filePath, // Path returned by the selected storage service
         uploadedBy: req.user.id, // Assuming req.user is populated by fetchUser middleware
       };
