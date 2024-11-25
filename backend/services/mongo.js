@@ -110,4 +110,28 @@ const getMetrics = async () => {
   }
 };
 
-module.exports = { uploadFile, downloadFile, getMetrics };
+const deleteFile = async (filePath) => {
+  if (!bucket) {
+    throw new Error("GridFSBucket is not initialized.");
+  }
+
+  try {
+    if (!ObjectId.isValid(filePath)) {
+      throw new Error("Invalid file ID format.");
+    }
+
+    const fileId = new ObjectId(filePath); // Convert filePath to ObjectId
+
+    await bucket.delete(fileId); // Delete the file from GridFS
+    console.log(`File with ID ${filePath} deleted successfully from GridFS.`);
+    return {
+      success: true,
+      message: `File with ID ${filePath} deleted successfully.`,
+    };
+  } catch (err) {
+    console.error("Error deleting file from GridFS:", err);
+    throw new Error("Failed to delete file from MongoDB");
+  }
+};
+
+module.exports = { uploadFile, downloadFile, getMetrics, deleteFile };

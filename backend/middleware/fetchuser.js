@@ -1,6 +1,6 @@
 const fetchUser = (req, res, next) => {
   // Log incoming request headers for debugging
-  console.log("Request headers:", req.headers);
+  // console.log("Request headers:", req.headers);
 
   // Use `cookie-parser` to parse cookies (ensure `cookie-parser` middleware is added to your app)
   const sessionId = req.cookies ? req.cookies["connect.sid"] : null;
@@ -12,7 +12,7 @@ const fetchUser = (req, res, next) => {
 
   // Validate session from `express-session`
   if (req.session && req.session.user) {
-    console.log("Session valid. User authenticated:", req.session.user);
+    // console.log("Session valid. User authenticated:", req.session.user);
 
     // Attach user info to the request object for downstream middleware or routes
     req.user = req.session.user;

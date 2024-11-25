@@ -99,22 +99,60 @@ router.get("/list", fetchUser, async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
 router.get("/download/:id", fetchUser, async (req, res) => {
   const fileId = req.params.id;
+  const userId = req.user.id; // Assuming `fetchUser` middleware attaches the user info to `req.user`
 
   try {
-    // Fetch file metadata from your database
-    const file = await File.findById(fileId);
+    // Fetch file metadata from your database, ensuring it belongs to the logged-in user
+    const file = await File.findOne({ _id: fileId, uploadedBy: userId });
     if (!file) {
       return res
         .status(404)
-        .json({ success: false, message: "File not found" });
+        .json({ success: false, message: "File not found or access denied" });
     }
 
-    // Fetch the file stream from HDFS using its stored file path
-    const fileStream = await hdfsService.downloadFile(file.filePath);
+    let fileStream;
+
+    // Determine storage type and fetch the file stream accordingly
+    if (file.storageType === "s3") {
+      try {
+        fileStream = await s3Service.downloadFile(file.filePath);
+      } catch (error) {
+        console.error("Error downloading file from S3:", error.message);
+        return res
+          .status(500)
+          .json({ success: false, message: "Failed to download file from S3" });
+      }
+    } else if (file.storageType === "hdfs") {
+      try {
+        fileStream = await hdfsService.downloadFile(file.filePath);
+      } catch (error) {
+        console.error("Error downloading file from HDFS:", error.message);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to download file from HDFS",
+        });
+      }
+    } else if (file.storageType === "mongo") {
+      try {
+        fileStream = await mongoService.downloadFile(file.filePath);
+      } catch (error) {
+        console.error("Error downloading file from MongoDB:", error.message);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to download file from MongoDB",
+        });
+      }
+    } else {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid storage type" });
+    }
+
     if (!fileStream) {
-      throw new Error("Failed to retrieve file stream from HDFS");
+      throw new Error("Failed to retrieve file stream.");
     }
 
     // Set headers to ensure the file is downloaded with the correct name and type
@@ -124,7 +162,7 @@ router.get("/download/:id", fetchUser, async (req, res) => {
     );
     res.setHeader("Content-Type", file.fileType || "application/octet-stream");
 
-    // Pipe the HDFS stream to the response
+    // Pipe the file stream to the response
     fileStream.pipe(res);
 
     // Handle errors in the stream
@@ -205,7 +243,7 @@ router.get("/get-metrics", fetchUser, async (req, res) => {
 });
 
 router.get("/get-hdfs-metrics", fetchUser, async (req, res) => {
-  const directoryPath = "/user/hadoop/uploads";  // Path to HDFS directory
+  const directoryPath = "/user/hadoop/uploads"; // Path to HDFS directory
 
   try {
     // Fetch the list of files in the HDFS directory
@@ -220,7 +258,9 @@ router.get("/get-hdfs-metrics", fetchUser, async (req, res) => {
     // Fetch metrics for each file
     const metricsPromises = fileList.map(async (filePath) => {
       try {
-        const { fileStatus, blockInfo } = await hdfsService.getHDFSMetrics(filePath);
+        const { fileStatus, blockInfo } = await hdfsService.getHDFSMetrics(
+          filePath
+        );
         return { filePath, fileStatus, blockInfo };
       } catch (error) {
         console.error(`Error fetching metrics for ${filePath}:`, error);
@@ -240,6 +280,5 @@ router.get("/get-hdfs-metrics", fetchUser, async (req, res) => {
     });
   }
 });
-
 
 module.exports = router;

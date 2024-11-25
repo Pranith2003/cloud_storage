@@ -24,10 +24,11 @@ ChartJS.register(
 );
 
 const StorageMetrics = () => {
-  const [metrics, setMetrics] = useState(null);
+  const [metrics, setMetrics] = useState(null); // Metrics from /get-metrics
+  const [hdfsMetrics, setHdfsMetrics] = useState(null); // Metrics from /get-hdfs-metrics
 
+  // Fetch Storage Metrics
   useEffect(() => {
-    // Fetching storage metrics from the backend API
     const fetchStorageStats = async () => {
       try {
         const response = await fetch(
@@ -44,12 +45,32 @@ const StorageMetrics = () => {
       }
     };
 
-    fetchStorageStats(); // Call the fetch function when the component mounts
+    const fetchHdfsStats = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/file/get-hdfs-metrics",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+        
+
+        const data = response.json();
+        console.log(data);
+        setHdfsMetrics(data.fileMetrics); // Store HDFS-specific file metrics
+      } catch (error) {
+        console.error("Error fetching HDFS metrics:", error);
+      }
+    };
+
+    fetchStorageStats(); // Fetch storage metrics when the component mounts
+    fetchHdfsStats(); // Fetch HDFS metrics when the component mounts
   }, []);
 
-  if (!metrics) return <div>Loading...</div>; // Show loading state while data is being fetched
+  if (!metrics || !hdfsMetrics) return <div>Loading...</div>; // Show loading state while data is being fetched
 
-  // Prepare Bar chart data
+  // Prepare Bar chart data for storage metrics
   const barData = {
     labels: ["HDFS", "MongoDB", "S3"],
     datasets: [
@@ -65,7 +86,7 @@ const StorageMetrics = () => {
     ],
   };
 
-  // Prepare Pie chart data
+  // Prepare Pie chart data for storage size
   const pieData = {
     labels: ["HDFS", "MongoDB", "S3"],
     datasets: [
@@ -79,6 +100,13 @@ const StorageMetrics = () => {
       },
     ],
   };
+
+  // Prepare HDFS-specific file metrics
+  const hdfsFileData = hdfsMetrics.map((file) => ({
+    filePath: file.filePath,
+    blockCount: file.blockInfo ? file.blockInfo.blockCount : 0,
+    blockSize: file.blockInfo ? file.blockInfo.blockSize : 0,
+  }));
 
   return (
     <div>
@@ -97,9 +125,53 @@ const StorageMetrics = () => {
         <div style={{ width: "45%" }}>
           <Bar data={barData} options={{ responsive: true }} />
         </div>
-        <div style={{ width: "30%" }}> {/* Reduced the width for Pie Chart */}
+        <div style={{ width: "30%" }}>
+          {/* Reduced the width for Pie Chart */}
           <Pie data={pieData} options={{ responsive: true }} />
         </div>
+      </div>
+
+      <h2 style={{ textAlign: "center", marginTop: "30px" }}>
+        HDFS File Metrics
+      </h2>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          marginTop: "20px",
+        }}
+      >
+        <table style={{ borderCollapse: "collapse", width: "80%" }}>
+          <thead>
+            <tr>
+              <th style={{ border: "1px solid black", padding: "10px" }}>
+                File Path
+              </th>
+              <th style={{ border: "1px solid black", padding: "10px" }}>
+                Block Count
+              </th>
+              <th style={{ border: "1px solid black", padding: "10px" }}>
+                Block Size (MB)
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {hdfsFileData.map((file, index) => (
+              <tr key={index}>
+                <td style={{ border: "1px solid black", padding: "10px" }}>
+                  {file.filePath}
+                </td>
+                <td style={{ border: "1px solid black", padding: "10px" }}>
+                  {file.blockCount}
+                </td>
+                <td style={{ border: "1px solid black", padding: "10px" }}>
+                  {file.blockSize}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
