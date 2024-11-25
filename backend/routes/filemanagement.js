@@ -98,8 +98,6 @@ router.get("/list", fetchUser, async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
-
-
 router.get("/download/:id", fetchUser, async (req, res) => {
   const fileId = req.params.id;
 
@@ -113,31 +111,56 @@ router.get("/download/:id", fetchUser, async (req, res) => {
         .json({ success: false, message: "File not found" });
     }
 
-    console.log(`Downloading file from MongoDB with ID: ${file.filePath}`);
+    console.log(`Downloading file from storage with ID: ${file.filePath}`);
 
-    const fileStream = await mongoService.downloadFile(file.filePath);
+    let fileStream = null;
+
+    // Determine the storage service
+    if (file.storageType === "s3") {
+      fileStream = await s3Service.downloadFile(file.filePath);
+    } else if (file.storageType === "hdfs") {
+      fileStream = await hdfsService.downloadFile(file.filePath);
+    } else if (file.storageType === "mongo") {
+      fileStream = await mongoService.downloadFile(file.filePath);
+    }
 
     if (!fileStream) {
+      console.error("Failed to retrieve file stream.");
       return res.status(500).json({
         success: false,
-        message: "Failed to retrieve the file from MongoDB",
+        message: "Failed to retrieve the file from storage",
       });
     }
 
-    // Set response headers for file download
+    // Validate file metadata
+    if (!file.fileName || !file.fileType) {
+      console.error("File metadata is incomplete.");
+      return res.status(500).json({
+        success: false,
+        message: "Incomplete file metadata",
+      });
+    }
+
+    // Set headers for file download
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=${file.fileName}`
+      `attachment; filename="${file.originalname}"`
     );
     res.setHeader("Content-Type", file.fileType);
 
     // Pipe the file stream to the response
     fileStream.pipe(res);
 
-    // Handle stream errors
     fileStream.on("error", (err) => {
-      console.error("Error while piping file stream to response:", err);
-      res.status(500).json({ success: false, message: "Error streaming file" });
+      console.error("Error while piping file stream:", err);
+      res.status(500).json({
+        success: false,
+        message: "Error while streaming file",
+      });
+    });
+
+    fileStream.on("end", () => {
+      console.log("File download completed.");
     });
   } catch (error) {
     console.error("Error during file download:", error);

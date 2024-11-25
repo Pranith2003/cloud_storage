@@ -1,6 +1,6 @@
 const express = require('express');
 const { getSystemHealth, getServiceHealth } = require('../services/monitoring');
-const validateStorage = require('../middleware/validateStorage');
+const { storageSelector, filetype } = require("../middleware/storageSelector");
 
 const router = express.Router();
 
@@ -42,9 +42,10 @@ router.get('/service-health', async (req, res) => {
  * Route: Check storage type health
  * Description: Validates the storage type (e.g., S3, HDFS, MongoDB) and checks its availability.
  */
-router.get('/storage-health', validateStorage, async (req, res) => {
+router.get('/storage-health', storageSelector, async (req, res) => {
     try {
-        const { storageType } = req;
+        const { storageType } = req.selectedStorage;
+        console.log(storageType)
         const message = `${storageType.toUpperCase()} is healthy and available for use.`;
 
         res.json({

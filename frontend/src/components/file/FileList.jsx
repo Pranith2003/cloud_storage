@@ -4,6 +4,7 @@ import axios from "axios";
 const FileList = () => {
   const [files, setFiles] = useState([]);
   const [status, setStatus] = useState("");
+  const [downloadProgress, setDownloadProgress] = useState({}); // Track progress per file
 
   const fetchFiles = async () => {
     try {
@@ -17,12 +18,27 @@ const FileList = () => {
   };
 
   const handleDownload = async (fileId) => {
+    setStatus(""); // Clear previous status
+    setDownloadProgress((prev) => ({
+      ...prev,
+      [fileId]: { progress: 0, status: "Downloading..." },
+    }));
+
     try {
       const response = await axios.get(
         `http://localhost:3000/api/file/download/${fileId}`,
         {
           responseType: "blob",
           withCredentials: true, // Include session cookies
+          onDownloadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            ) || 0; // Ensure progress is never NaN
+            setDownloadProgress((prev) => ({
+              ...prev,
+              [fileId]: { progress: percentCompleted, status: "Downloading..." },
+            }));
+          },
         }
       );
 
@@ -31,12 +47,21 @@ const FileList = () => {
       link.href = url;
       link.setAttribute(
         "download",
-        response.headers["content-disposition"].split("filename=")[1]
+        response.headers["content-disposition"]?.split("filename=")[1] || "file"
       );
       document.body.appendChild(link);
       link.click();
+
+      setDownloadProgress((prev) => ({
+        ...prev,
+        [fileId]: { progress: 100, status: "Download Complete!" },
+      }));
     } catch (error) {
       setStatus("Error downloading file: " + error.response?.data.message);
+      setDownloadProgress((prev) => ({
+        ...prev,
+        [fileId]: { progress: 0, status: "Download Failed" },
+      }));
     }
   };
 
@@ -63,9 +88,23 @@ const FileList = () => {
       <ul>
         {files.map((file) => (
           <li key={file._id}>
-            {file.fileName}
-            <button onClick={() => handleDownload(file._id)}>Download</button>
-            <button onClick={() => handleDelete(file._id)}>Delete</button>
+            <div>
+              <span>{file.fileName}</span>
+              <button onClick={() => handleDownload(file._id)}>Download</button>
+              <button onClick={() => handleDelete(file._id)}>Delete</button>
+            </div>
+            {downloadProgress[file._id] && (
+              <div>
+                <progress
+                  value={downloadProgress[file._id].progress || 0} // Default to 0
+                  max="100"
+                />
+                <span>
+                  {downloadProgress[file._id].status} (
+                  {downloadProgress[file._id].progress || 0}%)
+                </span>
+              </div>
+            )}
           </li>
         ))}
       </ul>
