@@ -1,6 +1,7 @@
 const express = require("express");
 const mongodb_conn = require("./config/db");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const session = require("express-session");
 require("dotenv").config();
 
@@ -13,12 +14,12 @@ mongodb_conn();
 // Middleware setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 const corsOptions = {
   origin: "http://localhost:5173", // Frontend origin
   credentials: true, // Allow cookies and credentials
 };
-
 app.use(cors(corsOptions));
 
 const key = process.env.SESSION_KEY;

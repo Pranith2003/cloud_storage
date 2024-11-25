@@ -9,13 +9,14 @@ const hdfsClient = WebHDFS.createClient({
   path: "/webhdfs/v1", // WebHDFS base path
 });
 
-/**
- * Upload a file to HDFS
- * @param {Object} file - File object from multer
- * @returns {Promise<Object>} - Returns the HDFS file path
- */
+// /**
+//  * Upload a file to HDFS
+//  * @param {Object} file - File object from multer
+//  * @returns {Promise<Object>} - Returns the HDFS file path
+//  */
 const uploadFile = async (file) => {
   try {
+    console.log(file);
     const fileStream = fs.createReadStream(file.path);
     const hdfsPath = `/user/hadoop/uploads/${file.originalname}`; // Destination path in HDFS
     console.log(`Uploading file to HDFS at path: ${hdfsPath}`);
@@ -40,26 +41,40 @@ const uploadFile = async (file) => {
   }
 };
 
-/**
- * Download a file from HDFS
- * @param {String} filePath - Path to the file in HDFS
- * @returns {Promise<Stream>} - Returns a readable stream for the file
- */
+// /**
+//  * Download a file from HDFS
+//  * @param {String} filePath - Path to the file in HDFS
+//  * @returns {Promise<Stream>} - Returns a readable stream for the file
+//  */
+
 const downloadFile = async (filePath) => {
-  return new Promise((resolve, reject) => {
-    console.log(`Downloading file from HDFS at path: ${filePath}`);
+  try {
+    console.log(`Attempting to read file from HDFS: ${filePath}`);
     const readStream = hdfsClient.createReadStream(filePath);
 
-    readStream.on("open", () => {
-      console.log(`File stream opened successfully for ${filePath}`);
-      resolve(readStream); // Return the readable stream
-    });
+    return new Promise((resolve, reject) => {
+      readStream.on("response", (response) => {
+        if (response.statusCode !== 200) {
+          reject(
+            new Error(
+              `Failed to download file. HTTP Status: ${response.statusCode}`
+            )
+          );
+        } else {
+          console.log("Stream successfully opened for:", filePath);
+          resolve(response); // Return the HTTP response as the stream
+        }
+      });
 
-    readStream.on("error", (err) => {
-      console.error(`Error reading file from HDFS at ${filePath}:`, err);
-      reject(new Error("Failed to download file from HDFS"));
+      readStream.on("error", (err) => {
+        console.error(`Error while reading from HDFS: ${filePath}`, err);
+        reject(new Error(`Failed to download file from HDFS: ${err.message}`));
+      });
     });
-  });
+  } catch (error) {
+    console.error("DownloadFile error:", error);
+    throw new Error("Failed to download file from HDFS");
+  }
 };
 
 module.exports = { uploadFile, downloadFile };

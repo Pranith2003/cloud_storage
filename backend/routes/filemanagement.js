@@ -8,6 +8,7 @@ const hdfsService = require("../services/hdfs");
 const mongoService = require("../services/mongo");
 const File = require("../models/file");
 const router = express.Router();
+const path = require("path");
 
 // Setup multer for file uploads
 const upload = multer({ dest: "uploads/" });
@@ -69,7 +70,7 @@ router.post(
         filePath: fileData.filePath, // Explicitly extract filePath
         uploadedBy: req.user.id,
       };
-
+      console.log(fileMetadata);
       const file = new File(fileMetadata);
       await file.save();
 
@@ -102,65 +103,38 @@ router.get("/download/:id", fetchUser, async (req, res) => {
   const fileId = req.params.id;
 
   try {
-    // Fetch file metadata from MongoDB
+    // Fetch file metadata from your database
     const file = await File.findById(fileId);
-
     if (!file) {
       return res
         .status(404)
         .json({ success: false, message: "File not found" });
     }
 
-    console.log(`Downloading file from storage with ID: ${file.filePath}`);
-
-    let fileStream = null;
-
-    // Determine the storage service
-    if (file.storageType === "s3") {
-      fileStream = await s3Service.downloadFile(file.filePath);
-    } else if (file.storageType === "hdfs") {
-      fileStream = await hdfsService.downloadFile(file.filePath);
-    } else if (file.storageType === "mongo") {
-      fileStream = await mongoService.downloadFile(file.filePath);
-    }
-
+    // Fetch the file stream from HDFS using its stored file path
+    const fileStream = await hdfsService.downloadFile(file.filePath);
     if (!fileStream) {
-      console.error("Failed to retrieve file stream.");
-      return res.status(500).json({
-        success: false,
-        message: "Failed to retrieve the file from storage",
-      });
+      throw new Error("Failed to retrieve file stream from HDFS");
     }
 
-    // Validate file metadata
-    if (!file.fileName || !file.fileType) {
-      console.error("File metadata is incomplete.");
-      return res.status(500).json({
-        success: false,
-        message: "Incomplete file metadata",
-      });
-    }
-
-    // Set headers for file download
+    // Set headers to ensure the file is downloaded with the correct name and type
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="${file.originalname}"`
+      `attachment; filename="${file.fileName}"`
     );
-    res.setHeader("Content-Type", file.fileType);
+    res.setHeader("Content-Type", file.fileType || "application/octet-stream");
 
-    // Pipe the file stream to the response
+    // Pipe the HDFS stream to the response
     fileStream.pipe(res);
 
+    // Handle errors in the stream
     fileStream.on("error", (err) => {
-      console.error("Error while piping file stream:", err);
-      res.status(500).json({
-        success: false,
-        message: "Error while streaming file",
-      });
+      console.error("Stream encountered an error:", err);
+      res.status(500).json({ success: false, message: "File stream error" });
     });
 
     fileStream.on("end", () => {
-      console.log("File download completed.");
+      console.log("Stream ended successfully.");
     });
   } catch (error) {
     console.error("Error during file download:", error);
