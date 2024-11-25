@@ -1,0 +1,109 @@
+/* Container styling */
+.signup-container {
+    display: flex;
+    align-items: center; /* Vertically center-align content */
+    justify-content: center; /* Center both sections */
+    height: 100vh;
+    background-color: #ffffff; /* Set the entire background to white */
+    gap: 0px; /* Remove the space between image and form */
+  }
+  
+  /* Left section with image */
+  .signup-image {
+    flex: 1; /* Keep equal width for the image section */
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Align image closer to the form */
+  }
+  
+  .signup-image img {
+    max-width: 80%; /* Adjust the image size */
+    height: auto;
+    object-fit: contain;
+    cursor: default; /* Ensure it is not clickable */
+  }
+  
+  /* Right section with form */
+  .signup-form {
+    flex: 1; /* Keep equal width for the form section */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Align form closer to the image */
+  }
+  
+  form {
+    max-width: 400px; /* Keep form width consistent */
+    width: 100%;
+    padding: 40px;
+    border-radius: 8px;
+    background: #ffffff;
+  }
+  
+  /* Center and Move Signup Heading to the Left */
+  form h2 {
+    text-align: center; /* Align text to the left */
+    margin-bottom: 30px; /* Add spacing below the heading */
+    margin-left: 10px;
+    margin-right: 50px; /* Slightly move the text to the left */
+  }
+  
+  /* Form Input Styles */
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  input {
+    width: 90%; /* Adjust input width */
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: transform 0.2s ease; /* Smooth zoom effect */
+    margin-bottom: 20px; /* Add consistent spacing between input fields */
+  }
+  
+  input:focus {
+    border-color: #007bff;
+    outline: none;
+    transform: scale(1.05); /* Slight zoom effect on focus */
+  }
+  
+  /* Increase distance between password input and button */
+  form div:last-child {
+    margin-bottom: 40px; /* Add spacing before the button */
+  }
+  
+  /* Button Styles */
+  button {
+    width: 90%; /* Match input width */
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+    transform: scale(1.03); /* Slight zoom effect on hover */
+  }
+  
+  button:active {
+    transform: scale(0.97); /* Slight shrink effect on click */
+  }
+  
+  /* Error Message */
+  .error {
+    color: #ff4d4d;
+    font-size: 14px;
+  }
+  
