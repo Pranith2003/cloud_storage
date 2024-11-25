@@ -1,0 +1,66 @@
+/* Style for the container */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 20px 0;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  /* Table Header */
+  table thead tr {
+    background-color: #007bff; /* Blue header */
+    color: white; /* White text */
+    font-weight: bold;
+  }
+  
+  table th,
+  table td {
+    border: 1px solid #ddd; /* Light border for table */
+    padding: 10px; /* Padding for table cells */
+  }
+  
+  table tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Light grey for even rows */
+  }
+  
+  table tbody tr:hover {
+    background-color: #f1f1f1; /* Slightly darker grey on hover */
+  }
+  
+  /* Buttons inside table cells */
+  table button {
+    background-color: #007bff; /* Blue button background */
+    color: white; /* White text */
+    border: none; /* Remove borders */
+    border-radius: 4px; /* Rounded corners */
+    padding: 5px 10px; /* Reduced padding */
+    margin: 5px; /* Add spacing between buttons */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 13px; /* Slightly smaller text size */
+  }
+  
+  table button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+  
+  table button:active {
+    background-color: #004085; /* Even darker blue on click */
+  }
+  
+  /* Progress bar styles */
+  progress {
+    width: 100px; /* Adjust width for better visibility */
+    height: 10px;
+    margin: 5px 0; /* Add spacing between progress and text */
+  }
+  
+  progress::-webkit-progress-bar {
+    background-color: #f3f3f3; /* Grey background for progress bar */
+  }
+  
+  progress::-webkit-progress-value {
+    background-color: #007bff; /* Blue progress bar fill */
+  }
+  
