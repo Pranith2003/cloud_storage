@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
+import Navbar from "../Navbar"; // Ensure this path is correct based on your folder structure
+import './File.css';
+
 
 const FileUpload = () => {
   const [file, setFile] = useState(null);
@@ -52,18 +55,24 @@ const FileUpload = () => {
 
   return (
     <div>
-      <h2>Upload File</h2>
-      <form onSubmit={handleUpload}>
-        <input type="file" onChange={handleFileChange} />
-        <button type="submit">Upload</button>
-      </form>
-      {file && (
-        <div>
-          <progress value={progress} max="100" />
-          <span>{progress}%</span>
-        </div>
-      )}
-      {status && <p>{status}</p>}
+      {/* Add Navbar at the top */}
+      <Navbar />
+
+      {/* File Upload Content */}
+      <div className="file-upload-container">
+        <h2>Upload File</h2>
+        <form onSubmit={handleUpload}>
+          <input type="file" onChange={handleFileChange} />
+          <button type="submit">Upload</button>
+        </form>
+        {file && (
+          <div>
+            <progress value={progress} max="100" />
+            <span>{progress}%</span>
+          </div>
+        )}
+        {status && <p>{status}</p>}
+      </div>
     </div>
   );
 };
