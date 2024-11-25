@@ -1,35 +1,55 @@
 import { useEffect, useState } from "react";
 import { Bar, Pie } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, BarElement, Title, Tooltip, Legend, ArcElement, LinearScale } from 'chart.js';
+import NavBar from "../Navbar";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  LinearScale,
+} from "chart.js";
 
 // Register components once, including LinearScale
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
-
-const response = {
-  hdfs: {
-    fileCount: 13,
-    totalSize: 94486836,
-  },
-  s3: {
-    fileCount: 10,
-    totalSize: 94486800,
-  },
-  mongo: {
-    fileCount: 7,
-    totalSize: 94486000,
-  },
-};
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 const StorageMetrics = () => {
   const [metrics, setMetrics] = useState(null);
 
   useEffect(() => {
-    // Simulate API response with the static data
-    setMetrics(response);
+    // Fetching storage metrics from the backend API
+    const fetchStorageStats = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/file/get-metrics",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+        const data = await response.json();
+        setMetrics(data);
+      } catch (error) {
+        console.error("Error fetching storage metrics:", error);
+      }
+    };
+
+    fetchStorageStats(); // Call the fetch function when the component mounts
   }, []);
 
-  if (!metrics) return <div>Loading...</div>;
+  if (!metrics) return <div>Loading...</div>; // Show loading state while data is being fetched
 
+  // Prepare Bar chart data
   const barData = {
     labels: ["HDFS", "MongoDB", "S3"],
     datasets: [
@@ -45,6 +65,7 @@ const StorageMetrics = () => {
     ],
   };
 
+  // Prepare Pie chart data
   const pieData = {
     labels: ["HDFS", "MongoDB", "S3"],
     datasets: [
@@ -61,6 +82,7 @@ const StorageMetrics = () => {
 
   return (
     <div>
+        <NavBar/>
       <h1>Storage Metrics</h1>
       <div style={{ width: "600px", margin: "0 auto" }}>
         <Bar data={barData} options={{ responsive: true }} />

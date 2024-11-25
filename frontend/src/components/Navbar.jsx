@@ -15,10 +15,10 @@ const Navbar = () => {
         {/* Navigation links */}
         <ul className="navbar-links">
           <li>
-            <Link to="/file/FileUpload">Upload Files</Link>
+            <Link to="/file/fileupload">Upload Files</Link>
           </li>
           <li>
-            <Link to="/files">System Check</Link>
+            <Link to="/file/health">System Check</Link>
           </li>
           <li>
             <Link to="/Dashboard">View Files</Link>

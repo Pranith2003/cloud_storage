@@ -43,7 +43,7 @@ router.get("/service-health", async (req, res) => {
  * Route: Check storage type health
  * Description: Validates the storage type (e.g., S3, HDFS, MongoDB) and checks its availability.
  */
-router.get("/storage-health", validateStorage, async (req, res) => {
+router.post("/storage-health", validateStorage, async (req, res) => {
   try {
     const storageType = req.body.storageType; // Use the selected storage type
     console.log(storageType);
