@@ -41,10 +41,6 @@ const StorageMetrics = () => {
           metrics.s3.fileCount,
         ],
         backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
-        borderColor: ["#FF6384", "#36A2EB", "#FFCE56"],
-        borderWidth: 1,
-        hoverBackgroundColor: ["#FF6384A0", "#36A2EBA0", "#FFCE56A0"],
-        hoverBorderColor: ["#FF6384", "#36A2EB", "#FFCE56"],
       },
     ],
   };
@@ -59,63 +55,18 @@ const StorageMetrics = () => {
           metrics.s3.totalSize,
         ],
         backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
-        hoverBackgroundColor: ["#FF6384A0", "#36A2EBA0", "#FFCE56A0"],
-        borderWidth: 1,
       },
     ],
-  };
-
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-        labels: {
-          color: 'rgba(0, 0, 0, 0.87)',
-          font: {
-            size: 14,
-          },
-        },
-      },
-      title: {
-        display: true,
-        text: 'Storage Metrics',
-        font: {
-          size: 20,
-          weight: 'bold',
-        },
-        color: 'rgba(0, 0, 0, 0.87)',
-      },
-    },
-    scales: {
-      x: {
-        ticks: {
-          color: 'rgba(0, 0, 0, 0.87)',
-        },
-        grid: {
-          display: false,
-        },
-      },
-      y: {
-        ticks: {
-          color: 'rgba(0, 0, 0, 0.87)',
-        },
-        grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
-        },
-      },
-    },
   };
 
   return (
     <div>
       <h1>Storage Metrics</h1>
-      <div style={{ width: "100%", maxWidth: "700px", margin: "20px auto" }}>
-        <Bar data={barData} options={options} height={400} />
+      <div style={{ width: "600px", margin: "0 auto" }}>
+        <Bar data={barData} options={{ responsive: true }} />
       </div>
-      <div style={{ width: "100%", maxWidth: "600px", margin: "20px auto" }}>
-        <Pie data={pieData} options={options} />
+      <div style={{ width: "600px", margin: "20px auto" }}>
+        <Pie data={pieData} options={{ responsive: true }} />
       </div>
     </div>
   );
