@@ -1,0 +1,60 @@
+.navbar {
+    background-color: #ffffff; /* White background */
+    color: #007bff; /* Blue text color */
+    padding: 10px 20px; /* Adjust padding for navbar height */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for separation */
+}
+  
+.navbar-container {
+    display: flex;
+    justify-content: space-between; /* Space out logo and links */
+    align-items: center;
+    width: 100%; /* Full-width navbar */
+    margin: 0 auto;
+}
+  
+.navbar-logo {
+    display: flex; /* Align image and text horizontally */
+    align-items: center; /* Center image and text vertically */
+    gap: 10px; /* Space between image and text */
+}
+  
+.navbar-logo-image {
+    height: 50px; /* Adjust image height for larger logo */
+    width: 50px; /* Adjust image width to match height */
+    object-fit: contain; /* Maintain image aspect ratio */
+}
+  
+.navbar-logo h1 {
+    margin: 0;
+    font-size: 1.8rem; /* Slightly larger font for visibility */
+    color: #007bff;
+    white-space: nowrap; /* Ensure text doesn't wrap to a new line */
+}
+  
+.navbar-links {
+    list-style: none;
+    display: flex;
+    justify-content: flex-end; /* Align links to the right */
+    gap: 20px; /* Add space between links */
+    margin: 0;
+    padding: 0;
+}
+  
+.navbar-links li {
+    margin: 0;
+}
+  
+.navbar-links a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 1.2rem; /* Maintain consistent text size for links */
+    transition: color 0.3s ease;
+}
+  
+.navbar-links a:hover {
+    color: #0056b3;
+}
