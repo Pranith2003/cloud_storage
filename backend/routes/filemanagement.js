@@ -176,4 +176,70 @@ router.delete("/delete/:id", fetchUser, async (req, res) => {
   }
 });
 
+router.get("/get-metrics", fetchUser, async (req, res) => {
+  try {
+    const hdfsMetrics = await hdfsService.getMetrics().catch((err) => {
+      console.error("Error fetching HDFS metrics:", err.message);
+      return { fileCount: 0, totalSize: 0 }; // Fallback metrics
+    });
+
+    const s3Metrics = await s3Service.getMetrics().catch((err) => {
+      console.error("Error fetching S3 metrics:", err.message);
+      return { fileCount: 0, totalSize: 0 }; // Fallback metrics
+    });
+
+    const mongoMetrics = await mongoService.getMetrics().catch((err) => {
+      console.error("Error fetching MongoDB metrics:", err.message);
+      return { fileCount: 0, totalSize: 0 }; // Fallback metrics
+    });
+
+    res.json({
+      hdfs: hdfsMetrics,
+      s3: s3Metrics,
+      mongo: mongoMetrics,
+    });
+  } catch (err) {
+    console.error("Error fetching storage metrics:", err);
+    res.status(500).json({ error: "Failed to fetch storage metrics" });
+  }
+});
+
+router.get("/get-hdfs-metrics", fetchUser, async (req, res) => {
+  const directoryPath = "/user/hadoop/uploads";  // Path to HDFS directory
+
+  try {
+    // Fetch the list of files in the HDFS directory
+    const fileList = await hdfsService.getFilesInDirectory(directoryPath);
+
+    if (!fileList || fileList.length === 0) {
+      return res.status(404).json({
+        error: "No files found in the specified HDFS directory",
+      });
+    }
+
+    // Fetch metrics for each file
+    const metricsPromises = fileList.map(async (filePath) => {
+      try {
+        const { fileStatus, blockInfo } = await hdfsService.getHDFSMetrics(filePath);
+        return { filePath, fileStatus, blockInfo };
+      } catch (error) {
+        console.error(`Error fetching metrics for ${filePath}:`, error);
+        return { filePath, error: "Failed to fetch file metrics" };
+      }
+    });
+
+    // Wait for all metrics to be fetched
+    const fileMetrics = await Promise.all(metricsPromises);
+
+    // Return the metrics
+    res.status(200).json({ fileMetrics });
+  } catch (error) {
+    console.error("Error in getHDFS metrics:", error);
+    res.status(500).json({
+      error: "Failed to fetch HDFS metrics",
+    });
+  }
+});
+
+
 module.exports = router;

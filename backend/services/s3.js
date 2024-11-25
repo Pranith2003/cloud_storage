@@ -56,4 +56,29 @@ const downloadFile = async (filePath) => {
   }
 };
 
-module.exports = { uploadFile, downloadFile };
+const getMetrics = async () => {
+  try {
+    const params = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      Prefix: "uploads/", // Fetch objects in the 'uploads' directory
+    };
+
+    const command = new ListObjectsV2Command(params);
+    const response = await s3Client.send(command);
+
+    // Calculate metrics
+    const files = response.Contents || [];
+    const fileCount = files.length;
+    const totalSize = files.reduce((sum, file) => sum + (file.Size || 0), 0);
+
+    return {
+      fileCount,
+      totalSize, // in bytes
+    };
+  } catch (err) {
+    console.error("Error fetching S3 metrics:", err.message);
+    throw new Error("Failed to fetch S3 metrics");
+  }
+};
+
+module.exports = { uploadFile, downloadFile, getMetrics };

@@ -77,4 +77,37 @@ const downloadFile = async (filePath) => {
   });
 };
 
-module.exports = { uploadFile, downloadFile };
+const getMetrics = async () => {
+  if (!bucket) {
+    throw new Error("GridFSBucket is not initialized.");
+  }
+
+  try {
+    const collection = bucket.s.db.collection(
+      `${bucket.s.options.bucketName}.files`
+    );
+
+    // Query to get total file count and aggregate total file size
+    const [metrics] = await collection
+      .aggregate([
+        {
+          $group: {
+            _id: null,
+            fileCount: { $sum: 1 },
+            totalSize: { $sum: "$length" }, // 'length' contains file size in bytes
+          },
+        },
+      ])
+      .toArray();
+
+    return {
+      fileCount: metrics?.fileCount || 0,
+      totalSize: metrics?.totalSize || 0, // Total size in bytes
+    };
+  } catch (err) {
+    console.error("Error fetching GridFS metrics:", err);
+    throw new Error("Failed to fetch metrics from MongoDB");
+  }
+};
+
+module.exports = { uploadFile, downloadFile, getMetrics };
