@@ -1,0 +1,95 @@
+/* Container styling */
+.signin-container {
+    display: flex;
+    align-items: center; /* Vertically center-align content */
+    justify-content: center; /* Center both sections with minimal gap */
+    height: 100vh;
+    background-color: #ffffff; /* Set the entire background to white */
+    gap: 40px; /* Reduce the space between the image and form */
+  }
+  
+  /* Left section with image */
+  .signin-image {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Align image closer to the form */
+  }
+  
+  .signin-image img {
+    max-width: 80%; /* Adjust image size */
+    height: auto;
+    object-fit: contain;
+    cursor: default; /* Ensure it is not clickable */
+  }
+  
+  /* Right section with form */
+  .signin-form {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Align form closer to the image */
+  }
+  
+  form {
+    max-width: 400px;
+    width: 100%;
+    padding: 40px;
+    border-radius: 8px;
+    background: #ffffff;
+  }
+  
+  /* Form Input Styles */
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: transform 0.2s ease; /* Smooth zoom effect */
+  }
+  
+  input:focus {
+    border-color: #007bff;
+    outline: none;
+    transform: scale(1.01); /* Slight zoom out when focused */
+  }
+  
+  /* Button Styles */
+  button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.3s; /* Smooth zoom and hover effects */
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+    transform: scale(1.03); /* Slight zoom out on hover */
+  }
+  
+  button:active {
+    transform: scale(0.97); /* Slight shrink effect on click */
+  }
+  
+  /* Error Message */
+  .error {
+    color: #ff4d4d;
+    font-size: 14px;
+  }
+  

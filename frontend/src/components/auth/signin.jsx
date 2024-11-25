@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import './Signin.css'; // Import the CSS file
+import DesignImage from './image.png'; // Update the path to the saved image
 
 const Signin = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -25,39 +27,54 @@ const Signin = () => {
 
       console.log(response.data);
       alert("Signin successful!");
-      navigate("/dashboard"); // Redirect to the dashboard
+      navigate("/dashboard"); 
     } catch (error) {
-      setError(error.response?.data || "An error occurred.");
+      // Ensure error is a string
+      const errorMessage =
+        error.response?.data?.message || "An error occurred during sign-in.";
+      setError(errorMessage);
     }
   };
 
   return (
-    <div className="signin">
-      <h2>Signin</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        {error && <p className="error">{error}</p>}
-        <button type="submit">Signin</button>
-      </form>
+    <div className="signin-container">
+      <div className="signin-image">
+        <img src={DesignImage} alt="Sign-in design" />
+      </div>
+
+      <div className="signin-form">
+        <form onSubmit={handleSubmit}>
+          <h2 style={{ textAlign: "center", marginBottom: "40px" }}>Sign In</h2>
+          <div>
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div>
+            <label>Password</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div style={{ textAlign: "left", marginBottom: "20px" }}>
+            <a href="/signup" style={{ fontSize: "14px", color: "#007bff" }}>
+              New User : SignUp
+            </a>
+          </div>
+          {/* Safely render the error */}
+          {error && <p className="error">{error}</p>}
+          <button type="submit">Sign In</button>
+        </form>
+      </div>
     </div>
   );
 };
