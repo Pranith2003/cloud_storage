@@ -12,10 +12,12 @@ const Navbar = () => {
           <img src={NavLogo} alt="Logo" className="navbar-logo-image" />
           <h1>Cloud Sphere</h1>
         </div>
-        {/* Navigation links */}
         <ul className="navbar-links">
           <li>
             <Link to="/file/fileupload">Upload Files</Link>
+          </li>
+          <li>
+            <Link to="/metrics/StorageMetrics">Stats</Link>
           </li>
           <li>
             <Link to="/file/health">System Check</Link>
@@ -24,7 +26,7 @@ const Navbar = () => {
             <Link to="/Dashboard">View Files</Link>
           </li>
           <li>
-            <Link to="/logout">Logout</Link>
+            <Link to="/auth">Logout</Link>
           </li>
         </ul>
       </div>

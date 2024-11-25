@@ -82,13 +82,24 @@ const StorageMetrics = () => {
 
   return (
     <div>
-        <NavBar/>
-      <h1>Storage Metrics</h1>
-      <div style={{ width: "600px", margin: "0 auto" }}>
-        <Bar data={barData} options={{ responsive: true }} />
-      </div>
-      <div style={{ width: "600px", margin: "20px auto" }}>
-        <Pie data={pieData} options={{ responsive: true }} />
+      <NavBar />
+      <h1 style={{ textAlign: "center" }}>Storage Metrics</h1>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "20px",
+          flexWrap: "wrap",
+          marginTop: "20px",
+        }}
+      >
+        <div style={{ width: "45%" }}>
+          <Bar data={barData} options={{ responsive: true }} />
+        </div>
+        <div style={{ width: "30%" }}> {/* Reduced the width for Pie Chart */}
+          <Pie data={pieData} options={{ responsive: true }} />
+        </div>
       </div>
     </div>
   );
