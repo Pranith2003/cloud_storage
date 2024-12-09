@@ -47,16 +47,29 @@ const StorageMetrics = () => {
 
     const fetchHdfsStats = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/file/get-hdfs-metrics",
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
-        
+        // const response = await fetch(
+        //   "http://localhost:3000/api/file/get-hdfs-metrics",
+        //   {
+        //     method: "GET",
+        //     credentials: "include",
+        //   }
+        // );
+        const response = {
+          fileMetrics: [
+            {
+              filePath: "/user/hadoop/uploads/80mb.pdf",
+              fileStatus: "Healthy",
+              blockInfo: { blockCount: 3, blockSize: 25 },
+            },
+            {
+              filePath: "/user/hadoop/uploads/90mb.pdf",
+              fileStatus: "Healthy",
+              blockInfo: { blockCount: 2, blockSize: 45 },
+            },
+          ],
+        };
 
-        const data = response.json();
+        const data = response;
         console.log(data);
         setHdfsMetrics(data.fileMetrics); // Store HDFS-specific file metrics
       } catch (error) {
